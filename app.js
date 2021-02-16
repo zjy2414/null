@@ -28,22 +28,36 @@ async function changeFile() {
   await fs.writeFileSync('./JD_DailyBonus.js', content, 'utf8')
 }
 
-async function sendNotify(title, desp) {
-  const options = {
-    uri: WXBOT,
+async function sendWecom(content) {
+  const e = WXBOT.split(",")
+  const tokenOptions = {
+    uri: 'https://qyapi.weixin.qq.com/cgi-bin/gettoken',
+    qs: {
+      'corpid': e[0],
+      'corpsecret': e[1],
+    },
+    json: true
+  }
+  var token = ""
+  await rp(tokenOptions).then(res => {
+    token = res["access_token"]
+  })
+  const send_url = 'https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=' + token
+  const msgOptions = {
+    uri: send_url,
     body: {
+      "touser": "@all",
       "msgtype": "text",
+      "agentid": e[2],
       "text": {
-        "content": title + "\n" + desp
+        "content": content
       }
     },
     json: true,
     method: 'POST'
   }
-  await rp.post(options).then(res => {
-    console.log(res)
-  }).catch((err) => {
-    console.log(err)
+  await rp.post(msgOptions).then(res => {
+    console.log(res["errMsg"])
   })
 }
 
@@ -73,8 +87,7 @@ async function start() {
     let t2 = content.match(/【签到总计】:((.|\n)*)【账号总计】/)
     let res2 = t2 ? t2[1].replace(/\n/, '') : '总计0'
 
-
-    await sendNotify("" + ` ${res2} ` + ` ${res} ` + new Date().toLocaleDateString(), content);
+    await sendWecom("" + ` ${res2} ` + ` ${res} ` + new Date().toLocaleDateString() + "\n" + content);
   }
 }
 
