@@ -2,6 +2,8 @@
 
 **Notice: This version is use WeCom(Wechat for business) to push.**
 
+active
+
 use:
 
 - fill secret JD_COOKIE use ref's way.
